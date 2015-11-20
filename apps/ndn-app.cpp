@@ -48,13 +48,22 @@ App::GetTypeId(void)
                                         MakeTraceSourceAccessor(&App::m_receivedDatas),
                                         "ns3::ndn::App::DataTraceCallback")
 
+                        .AddTraceSource("ReceivedBeads", "ReceivedBeads",
+                                        MakeTraceSourceAccessor(&App::m_receivedBeads),
+                                        "ns3::ndn::App::BeadTraceCallback")
+
                         .AddTraceSource("TransmittedInterests", "TransmittedInterests",
                                         MakeTraceSourceAccessor(&App::m_transmittedInterests),
                                         "ns3::ndn::App::InterestTraceCallback")
 
                         .AddTraceSource("TransmittedDatas", "TransmittedDatas",
                                         MakeTraceSourceAccessor(&App::m_transmittedDatas),
-                                        "ns3::ndn::App::DataTraceCallback");
+                                        "ns3::ndn::App::DataTraceCallback")
+
+                        .AddTraceSource("TransmittedBeads", "TransmittedBeads",
+                                        MakeTraceSourceAccessor(&App::m_transmittedBeads),
+                                        "ns3::ndn::App::BeadTraceCallback");
+
   return tid;
 }
 

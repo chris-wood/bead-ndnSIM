@@ -85,7 +85,7 @@ private:
   Name m_postfix;
   uint32_t m_virtualPayloadSize;
   Time m_freshness;
-  std::vector<shared_ptr<Data>> datas;
+  std::vector<std::string> dataNames;
   std::vector<std::string> preimages;
 
   uint32_t m_signature;

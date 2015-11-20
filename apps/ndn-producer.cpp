@@ -112,10 +112,9 @@ Producer::GetTypeId(void)
   return tid;
 }
 
-Producer::Producer()
+Producer::Producer() : m_frequency(1.0), m_firstTime(true)
 {
   NS_LOG_FUNCTION_NOARGS();
-  m_firstTime = true;
 }
 
 // inherited from Application base class.
@@ -126,6 +125,8 @@ Producer::StartApplication()
   App::StartApplication();
 
   FibHelper::AddRoute(GetNode(), m_prefix, m_face, 0);
+
+  ScheduleNextBead();
 }
 
 void
@@ -165,7 +166,7 @@ void
 Producer::ScheduleNextBead()
 {
   // double mean = 8.0 * m_payloadSize / m_desiredRate.GetBitRate ();
-  // std::cout << "next: " << Simulator::Now().ToDouble(Time::S) + mean << "s\n";
+  std::cout << "next called: " << Simulator::Now().ToDouble(Time::S) << "s\n";
 
   if (m_firstTime) {
     m_sendEvent = Simulator::Schedule(Seconds(0.0), &Producer::SendBead, this);
@@ -181,14 +182,40 @@ Producer::ScheduleNextBead()
 void
 Producer::SendBead()
 {
-    // shared_ptr<Data> data = datas.back();
-    //
-    // Name dataName(data->getName());
-    //
-    // auto bead = make_shared<Bead>();
-    // bead->setName(dataName);
-    //
-    // bead->setToken(""); // not 0!
+    std::cout << "Enter SendBead" << std::endl;
+
+    if (dataNames.size() > 0) {
+        std::string name = dataNames.back();
+        std::string preimage = preimages.back();
+
+        Name dataName(name);
+
+        auto bead = make_shared<Bead>();
+        bead->setName(dataName);
+
+        bead->setToken(preimage);
+
+        // bead->setFreshnessPeriod(::ndn::time::milliseconds(m_freshness.GetMilliSeconds()));
+        // bead->setContent(make_shared<::ndn::Buffer>(m_virtualPayloadSize));
+
+        // Signature signature;
+        // SignatureInfo signatureInfo(static_cast< ::ndn::tlv::SignatureTypeValue>(255));
+        // if (m_keyLocator.size() > 0) {
+        //   signatureInfo.setKeyLocator(m_keyLocator);
+        // }
+        // signature.setInfo(signatureInfo);
+        // signature.setValue(::ndn::nonNegativeIntegerBlock(::ndn::tlv::SignatureValue, m_signature));
+        // bead->setSignature(signature);
+
+        NS_LOG_INFO("node(" << GetNode()->GetId() << ") responding with BEAD: " << bead->getName());
+
+        // to create real wire encoding
+        bead->wireEncode();
+
+        m_transmittedBeads(bead, this, m_face);
+        m_face->onReceiveBead(*bead);
+
+    }
 }
 
 void
@@ -209,7 +236,8 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
   data->setName(dataName);
 
   // Ensure that data is saved so we can send BEADs later
-  datas.push_back(data);
+  // datas.push_back(data);
+  dataNames.push_back(dataName.toUri());
 
   data->setFreshnessPeriod(::ndn::time::milliseconds(m_freshness.GetMilliSeconds()));
 
@@ -222,7 +250,10 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
   str << preimageInt;
   std::string preimage = str.str();
   preimages.push_back(preimage);
-  data->setToken(preimage);
+
+
+  std::string image = SHA256HashString(preimage);
+  data->setToken(image);
 
   Signature signature;
   SignatureInfo signatureInfo(static_cast< ::ndn::tlv::SignatureTypeValue>(255));
@@ -243,6 +274,7 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
 
   m_transmittedDatas(data, this, m_face);
   m_face->onReceiveData(*data);
+  ScheduleNextBead();
 }
 
 } // namespace ndn

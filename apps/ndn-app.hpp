@@ -120,6 +120,9 @@ protected:
 
   TracedCallback<shared_ptr<const Data>, Ptr<App>, shared_ptr<Face>>
     m_transmittedDatas; ///< @brief App-level trace of transmitted Data
+
+  TracedCallback<shared_ptr<const Bead>, Ptr<App>, shared_ptr<Face>>
+    m_transmittedBeads; ///< @brief App-level trace of transmitted Bead
 };
 
 } // namespace ndn
