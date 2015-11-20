@@ -78,16 +78,29 @@ Producer::GetTypeId(void)
       .AddConstructor<Producer>()
       .AddAttribute("Prefix", "Prefix, for which producer has the data", StringValue("/"),
                     MakeNameAccessor(&Producer::m_prefix), MakeNameChecker())
+
       .AddAttribute(
          "Postfix",
          "Postfix that is added to the output data (e.g., for adding producer-uniqueness)",
          StringValue("/"), MakeNameAccessor(&Producer::m_postfix), MakeNameChecker())
+
       .AddAttribute("PayloadSize", "Virtual payload size for Content packets", UintegerValue(1024),
                     MakeUintegerAccessor(&Producer::m_virtualPayloadSize),
                     MakeUintegerChecker<uint32_t>())
+
       .AddAttribute("Freshness", "Freshness of data packets, if 0, then unlimited freshness",
                     TimeValue(Seconds(0)), MakeTimeAccessor(&Producer::m_freshness),
                     MakeTimeChecker())
+
+      .AddAttribute("Frequency", "Frequency of interest packets", StringValue("1.0"),
+                  MakeDoubleAccessor(&Producer::m_frequency), MakeDoubleChecker<double>())
+
+      .AddAttribute("Randomize",
+                  "Type of send time randomization: none (default), uniform, exponential",
+                  StringValue("none"),
+                  MakeStringAccessor(&Producer::SetRandomize, &Producer::GetRandomize),
+                  MakeStringChecker())
+
       .AddAttribute(
          "Signature",
          "Fake signature, 0 valid signature (default), other values application-specific",
@@ -124,7 +137,7 @@ Producer::StopApplication()
 }
 
 void
-Producer::SetRandomType(std::string value)
+Producer::SetRandomize(std::string value)
 {
     if (value == "uniform") {
       m_random = CreateObject<UniformRandomVariable>();
@@ -140,6 +153,12 @@ Producer::SetRandomType(std::string value)
       m_random = 0;
 
     m_randomType = value;
+}
+
+std::string
+Producer::GetRandomize() const
+{
+  return m_randomType;
 }
 
 void

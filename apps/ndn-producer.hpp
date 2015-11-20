@@ -51,7 +51,10 @@ public:
   Producer();
 
   void
-  SetRandomType(std::string value);
+  SetRandomize(std::string value);
+
+  std::string
+  GetRandomize() const;
 
   void
   ScheduleNextBead();
