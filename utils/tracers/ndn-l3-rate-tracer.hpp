@@ -134,6 +134,12 @@ protected:
   InInterests(const Interest& interest, const Face& face);
 
   virtual void
+  OutBeads(const Bead& bead, const Face& face);
+
+  virtual void
+  InBeads(const Bead& bead, const Face& face);
+
+  virtual void
   OutData(const Data& data, const Face& face);
 
   virtual void

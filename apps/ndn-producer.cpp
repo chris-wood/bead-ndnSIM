@@ -92,8 +92,11 @@ Producer::GetTypeId(void)
                     TimeValue(Seconds(0)), MakeTimeAccessor(&Producer::m_freshness),
                     MakeTimeChecker())
 
-      .AddAttribute("Frequency", "Frequency of interest packets", StringValue("1.0"),
+      .AddAttribute("Frequency", "Frequency of BEAD packets", StringValue("0.0"),
                   MakeDoubleAccessor(&Producer::m_frequency), MakeDoubleChecker<double>())
+
+      .AddAttribute("Percentage", "Percentage of content that is to be BEADed", StringValue("0.05"),
+                  MakeDoubleAccessor(&Producer::m_percentage), MakeDoubleChecker<double>())
 
       .AddAttribute("Randomize",
                   "Type of send time randomization: none (default), uniform, exponential",
@@ -112,7 +115,7 @@ Producer::GetTypeId(void)
   return tid;
 }
 
-Producer::Producer() : m_frequency(1.0), m_firstTime(true)
+Producer::Producer() : m_frequency(0), m_firstTime(true), m_percentage(0.05) // frequency initialized to 0, so one must set it to something else to get the BEADs to send
 {
   NS_LOG_FUNCTION_NOARGS();
 }
@@ -165,17 +168,19 @@ Producer::GetRandomize() const
 void
 Producer::ScheduleNextBead()
 {
-  // double mean = 8.0 * m_payloadSize / m_desiredRate.GetBitRate ();
-  std::cout << "next called: " << Simulator::Now().ToDouble(Time::S) << "s\n";
+  if (m_frequency > 0) {
+      // double mean = 8.0 * m_payloadSize / m_desiredRate.GetBitRate ();
+      std::cout << "next called: " << Simulator::Now().ToDouble(Time::S) << "s\n";
 
-  if (m_firstTime) {
-    m_sendEvent = Simulator::Schedule(Seconds(0.0), &Producer::SendBead, this);
-    m_firstTime = false;
-  }
-  else if (!m_sendEvent.IsRunning()) {
-    m_sendEvent = Simulator::Schedule((m_random == 0) ? Seconds(1.0 / m_frequency)
-                                                      : Seconds(m_random->GetValue()),
-                                      &Producer::SendBead, this);
+      if (m_firstTime) {
+        m_sendEvent = Simulator::Schedule(Seconds(0.0), &Producer::SendBead, this);
+        m_firstTime = false;
+      }
+      else if (!m_sendEvent.IsRunning()) {
+        m_sendEvent = Simulator::Schedule((m_random == 0) ? Seconds(1.0 / m_frequency)
+                                                          : Seconds(m_random->GetValue()),
+                                          &Producer::SendBead, this);
+      }
   }
 }
 
@@ -184,9 +189,12 @@ Producer::SendBead()
 {
     std::cout << "Enter SendBead" << std::endl;
 
-    if (dataNames.size() > 0) {
-        std::string name = dataNames.back();
-        std::string preimage = preimages.back();
+    int numberOfBeads = (int) (m_percentage * dataNames.size());
+    int totalCount = dataNames.size();
+
+    for (int i = 0; i < numberOfBeads; i++) {
+        std::string name = dataNames.at(totalCount - i - 1);
+        std::string preimage = preimages.at(totalCount - i - 1);
 
         Name dataName(name);
 
@@ -214,8 +222,11 @@ Producer::SendBead()
 
         m_transmittedBeads(bead, this, m_face);
         m_face->onReceiveBead(*bead);
-
     }
+
+    // Wipe everything so we can collect more
+    dataNames.clear();
+    preimages.clear();
 }
 
 void
@@ -274,7 +285,10 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
 
   m_transmittedDatas(data, this, m_face);
   m_face->onReceiveData(*data);
-  ScheduleNextBead();
+
+  if (m_frequency > 0) {
+    ScheduleNextBead();
+  }
 }
 
 } // namespace ndn

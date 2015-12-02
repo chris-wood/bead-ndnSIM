@@ -135,6 +135,12 @@ public:
   Ptr<FaceContainer>
   Install(const std::string& nodeName) const;
 
+  void
+  InstallCallback(Ptr<Node> node, size_t forwardingDelayCallback, size_t id) const;
+
+  void
+  InstallBeadDropCallback(Ptr<Node> node, size_t callback, int id) const;
+
   /**
    * \brief Install Ndn stack on the node
    *

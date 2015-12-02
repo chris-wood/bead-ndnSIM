@@ -18,7 +18,7 @@ data$Kilobits <- data$Kilobytes * 8
 data$Type = factor(data$Type)
 
 # exlude irrelevant types
-data = subset(data, Type %in% c("InInterests", "OutInterests", "InData", "OutData"))
+data = subset(data, Type %in% c("InInterests", "OutInterests", "InData", "OutData", "InBeads", "OutBeads"))
 
 # combine stats from all faces
 data.combined = summaryBy(. ~ Time + Node + Type, data=data, FUN=sum)

@@ -89,7 +89,7 @@ main(int argc, char* argv[])
   // Producer will reply to all requests starting with /prefix
   producerHelper.SetPrefix("/prefix");
   producerHelper.SetAttribute("PayloadSize", StringValue("1024"));
-  consumerHelper.SetAttribute("Frequency", StringValue("1")); // 1 BEAD every second
+  producerHelper.SetAttribute("Frequency", StringValue("1")); // 1 BEAD every second
   producerHelper.Install(nodes.Get(2)); // last node
 
   Simulator::Stop(Seconds(20.0));

@@ -270,6 +270,9 @@ L3RateTracer::Print(std::ostream& os) const
     PRINTER("InData", m_inData);
     PRINTER("OutData", m_outData);
 
+    PRINTER("InBeads", m_inBeads);
+    PRINTER("OutBeads", m_outBeads);
+
     PRINTER("InSatisfiedInterests", m_satisfiedInterests);
     PRINTER("InTimedOutInterests", m_timedOutInterests);
 
@@ -306,6 +309,27 @@ L3RateTracer::InInterests(const Interest& interest, const Face& face)
       interest.wireEncode().size();
   }
 }
+
+void
+L3RateTracer::OutBeads(const Bead& bead, const Face& face)
+{
+  std::get<0>(m_stats[face.shared_from_this()]).m_outBeads++;
+  if (bead.hasWire()) {
+    std::get<1>(m_stats[face.shared_from_this()]).m_outBeads +=
+      bead.wireEncode().size();
+  }
+}
+
+void
+L3RateTracer::InBeads(const Bead& bead, const Face& face)
+{
+  std::get<0>(m_stats[face.shared_from_this()]).m_inBeads++;
+  if (bead.hasWire()) {
+    std::get<1>(m_stats[face.shared_from_this()]).m_inBeads +=
+      bead.wireEncode().size();
+  }
+}
+
 
 void
 L3RateTracer::OutData(const Data& data, const Face& face)

@@ -61,6 +61,8 @@ L3Tracer::Connect()
   l3->TraceConnectWithoutContext("InInterests", MakeCallback(&L3Tracer::InInterests, this));
   l3->TraceConnectWithoutContext("OutData", MakeCallback(&L3Tracer::OutData, this));
   l3->TraceConnectWithoutContext("InData", MakeCallback(&L3Tracer::InData, this));
+  l3->TraceConnectWithoutContext("OutBeads", MakeCallback(&L3Tracer::OutBeads, this));
+  l3->TraceConnectWithoutContext("InBeads", MakeCallback(&L3Tracer::InBeads, this));
 
   // satisfied/timed out PIs
   l3->TraceConnectWithoutContext("SatisfiedInterests",

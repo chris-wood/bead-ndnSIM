@@ -121,6 +121,23 @@ StackHelper::setCsSize(size_t maxSize)
   m_maxCsSize = maxSize;
 }
 
+void
+StackHelper::InstallCallback(Ptr<Node> node, size_t forwardingDelayCallback, size_t id) const
+{
+  // Set the ForwardingDelay callback
+  Ptr<L3Protocol> l3Protocol = node->GetObject<L3Protocol>();
+  nfd::Forwarder& forwarder = *l3Protocol->getForwarder();
+  forwarder.setForwardingDelayCallback(forwardingDelayCallback, id);
+}
+
+void
+StackHelper::InstallBeadDropCallback(Ptr<Node> node, size_t callback, int id) const
+{
+    Ptr<L3Protocol> l3Protocol = node->GetObject<L3Protocol>();
+    nfd::Forwarder& forwarder = *l3Protocol->getForwarder();
+    forwarder.setBeadDropCallback(callback, id);
+}
+
 Ptr<FaceContainer>
 StackHelper::Install(const NodeContainer& c) const
 {

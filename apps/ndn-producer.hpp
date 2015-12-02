@@ -78,6 +78,7 @@ private:
   bool m_firstTime;
   EventId m_sendEvent;
   double m_frequency; // Frequency of BEADs packets (in hertz)
+  double m_percentage;
   Ptr<RandomVariableStream> m_random;
   std::string m_randomType;
 

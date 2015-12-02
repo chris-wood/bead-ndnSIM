@@ -83,9 +83,9 @@ L3Protocol::GetTypeId(void)
       .AddTraceSource("InData", "InData", MakeTraceSourceAccessor(&L3Protocol::m_inData),
                       "ns3::ndn::L3Protocol::DataTraceCallback")
 
-      .AddTraceSource("OutBead", "OutBead", MakeTraceSourceAccessor(&L3Protocol::m_outBead),
+      .AddTraceSource("OutBeads", "OutBeads", MakeTraceSourceAccessor(&L3Protocol::m_outBeads),
                       "ns3::ndn::L3Protocol::DataTraceCallback")
-      .AddTraceSource("InBead", "InBead", MakeTraceSourceAccessor(&L3Protocol::m_inBead),
+      .AddTraceSource("InBeads", "InBeads", MakeTraceSourceAccessor(&L3Protocol::m_inBeads),
                       "ns3::ndn::L3Protocol::DataTraceCallback")
 
       ////////////////////////////////////////////////////////////////////
@@ -195,6 +195,7 @@ L3Protocol::initialize()
 
   m_impl->m_forwarder->getFaceTable().addReserved(make_shared<nfd::NullFace>(), nfd::FACEID_NULL);
 
+  // m_impl->m_forwarder->onBead.connect(std::ref(m_inBeads));
   m_impl->m_forwarder->beforeSatisfyInterest.connect(std::ref(m_satisfiedInterests));
   m_impl->m_forwarder->beforeExpirePendingInterest.connect(std::ref(m_timedOutInterests));
 }
@@ -378,9 +379,9 @@ L3Protocol::addFace(shared_ptr<Face> face)
 
   face->onSendData.connect([this, face](const Data& data) { this->m_outData(data, *face); });
 
-  face->onReceiveBead.connect([this, face](const Bead& bead) { this->m_inBead(bead, *face); });
+  face->onReceiveBead.connect([this, face](const Bead& bead) { this->m_inBeads(bead, *face); });
 
-  face->onSendBead.connect([this, face](const Bead& bead) { this->m_outBead(bead, *face); });
+  face->onSendBead.connect([this, face](const Bead& bead) { this->m_outBeads(bead, *face); });
 
   return face->getId();
 }

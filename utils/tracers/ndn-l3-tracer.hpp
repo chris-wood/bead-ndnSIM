@@ -89,6 +89,12 @@ protected:
   InInterests(const Interest&, const Face&) = 0;
 
   virtual void
+  OutBeads(const Bead&, const Face&) = 0;
+
+  virtual void
+  InBeads(const Bead&, const Face&) = 0;
+
+  virtual void
   OutData(const Data&, const Face&) = 0;
 
   virtual void
@@ -112,6 +118,8 @@ protected:
       m_outInterests = 0;
       m_inData = 0;
       m_outData = 0;
+      m_inBeads = 0;
+      m_outBeads = 0;
       m_satisfiedInterests = 0;
       m_timedOutInterests = 0;
 
@@ -123,6 +131,8 @@ protected:
     double m_outInterests;
     double m_inData;
     double m_outData;
+    double m_inBeads;
+    double m_outBeads;
     double m_satisfiedInterests;
     double m_timedOutInterests;
     double m_outSatisfiedInterests;

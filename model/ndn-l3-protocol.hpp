@@ -198,8 +198,8 @@ private:
   TracedCallback<const Data&, const Face&> m_outData; ///< @brief trace of outgoing Data
   TracedCallback<const Data&, const Face&> m_inData;  ///< @brief trace of incoming Data
 
-  TracedCallback<const Bead&, const Face&> m_outBead; ///< @brief trace of outgoing Bead
-  TracedCallback<const Bead&, const Face&> m_inBead;  ///< @brief trace of incoming Bead
+  TracedCallback<const Bead&, const Face&> m_outBeads; ///< @brief trace of outgoing Bead
+  TracedCallback<const Bead&, const Face&> m_inBeads;  ///< @brief trace of incoming Bead
 
   TracedCallback<const nfd::pit::Entry&, const Face&/*in face*/, const Data&> m_satisfiedInterests;
   TracedCallback<const nfd::pit::Entry&> m_timedOutInterests;
