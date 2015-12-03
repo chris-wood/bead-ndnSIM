@@ -47,6 +47,7 @@
 #include <cryptopp/dsa.h>
 
 #include <memory>
+#include <vector>
 
 NS_LOG_COMPONENT_DEFINE("ndn.Producer");
 
@@ -170,7 +171,7 @@ Producer::ScheduleNextBead()
 {
   if (m_frequency > 0) {
       // double mean = 8.0 * m_payloadSize / m_desiredRate.GetBitRate ();
-      std::cout << "next called: " << Simulator::Now().ToDouble(Time::S) << "s\n";
+    //   std::cout << "next called: " << Simulator::Now().ToDouble(Time::S) << "s\n";
 
       if (m_firstTime) {
         m_sendEvent = Simulator::Schedule(Seconds(0.0), &Producer::SendBead, this);
@@ -187,10 +188,10 @@ Producer::ScheduleNextBead()
 void
 Producer::SendBead()
 {
-    std::cout << "Enter SendBead" << std::endl;
-
     int numberOfBeads = (int) (m_percentage * dataNames.size());
     int totalCount = dataNames.size();
+
+    std::cout << "Producer is sending " << numberOfBeads << " beads out of " << dataNames.size() << " things" << std::endl;
 
     for (int i = 0; i < numberOfBeads; i++) {
         std::string name = dataNames.at(totalCount - i - 1);
@@ -224,20 +225,30 @@ Producer::SendBead()
         m_face->onReceiveBead(*bead);
     }
 
-    // Wipe everything so we can collect more
-    dataNames.clear();
-    preimages.clear();
+    size_t count = 0;
+    for (std::vector<std::string>::reverse_iterator rit = dataNames.rbegin(); count < numberOfBeads; count++, rit++) {
+        dataNames.erase(--(rit.base()));
+    }
+    count = 0;
+    for (std::vector<std::string>::reverse_iterator rit = preimages.rbegin(); count < numberOfBeads; count++, rit++) {
+        preimages.erase(--(rit.base()));
+    }
 }
+
+// size_t received = 0;
 
 void
 Producer::OnInterest(shared_ptr<const Interest> interest)
 {
   App::OnInterest(interest); // tracing inside
 
+  // received++;
+  // std::cout << "Producer received " << received << std::endl;
+
   NS_LOG_FUNCTION(this << interest);
 
-  if (!m_active)
-    return;
+  // if (!m_active)
+  // return;
 
   Name dataName(interest->getName());
   // dataName.append(m_postfix);

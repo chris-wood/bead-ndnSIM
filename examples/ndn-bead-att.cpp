@@ -39,14 +39,14 @@ namespace ns3 {
     Config::SetDefault("ns3::PointToPointChannel::Delay", StringValue("10ms"));
     Config::SetDefault("ns3::DropTailQueue::MaxPackets", StringValue("4294967295"));
 
-    std::string fof;
+    std::string fof = "fof.txt";
     std::string dropFileName = "drops.txt";
     std::string topologyFile = "src/ndnSIM/examples/topologies/topo-tree.txt";
     std::string appDelayFile = "app-delays-trace.txt";
     std::string rateTraceFile = "rate-trace.txt";
     std::string percentage = "1.0";
     std::string frequency = "1";
-    int simulationTime = 0;
+    int simulationTime = 1000;
 
     CommandLine cmd;
     cmd.AddValue("fof", "forwarder overhead file", fof);
@@ -202,6 +202,7 @@ namespace ns3 {
     for (int i = NUM_OF_CONSUMERS; i < NUM_OF_CONSUMERS + NUM_OF_ROUTERS; i++) {
       ndnHelperWithCache.Install(nodes.Get(i));
       ndnHelperWithCache.InstallCallback(nodes.Get(i), (size_t)&ForwardingDelay, i);
+      ndnHelperWithCache.InstallBeadDropCallback(nodes.Get(i), (size_t)&BeadDropCallback, i);
     }
 
     // Consumers

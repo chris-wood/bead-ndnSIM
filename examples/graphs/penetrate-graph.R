@@ -8,10 +8,12 @@ library(scales)
 # install.packages('doBy')
 library(doBy)
 
+### TODO: do something differently. derp.
+
 #########################
 # Rate trace processing #
 #########################
-data = read.table("rate-trace_0.5_1", header=T)
+data = read.table("rate-trace.txt", header=T)
 data$Node = factor(data$Node)
 data$FaceId <- factor(data$FaceId)
 data$Kilobits <- data$Kilobytes * 8

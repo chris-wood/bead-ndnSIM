@@ -30,6 +30,7 @@ namespace ns3 {
     void
     ForwardingDelay(ns3::Time eventTime, float delay, double size)
     {
+        // std::cout << "FWD DELAY: " << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\t" << size << "\n";
         delayFile << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\t" << size << "\n";
     }
 
@@ -38,20 +39,21 @@ namespace ns3 {
     void
     BeadDropCallback(int id, uint64_t hops)
     {
+    //   std::cout << "BEAD DROP: " << id << "\t" << hops << "\n";
       dropFile << id << "\t" << hops << "\n";
     }
 
 int
 main(int argc, char* argv[])
 {
-  std::string fof;
+  std::string fof = "fof.txt";
   std::string dropFileName = "drops.txt";
   std::string topologyFile = "src/ndnSIM/examples/topologies/topo-tree.txt";
   std::string appDelayFile = "app-delays-trace.txt";
   std::string rateTraceFile = "rate-trace.txt";
   std::string percentage = "1.0";
   std::string frequency = "1";
-  int simulationTime = 0;
+  int simulationTime = 1000;
 
   CommandLine cmd;
   cmd.AddValue("fof", "forwarder overhead file", fof);
@@ -78,7 +80,8 @@ main(int argc, char* argv[])
   Ptr<Node> consumers[4] = {Names::Find<Node>("leaf-1"), Names::Find<Node>("leaf-2"),
                             Names::Find<Node>("leaf-3"), Names::Find<Node>("leaf-4")};
   Ptr<Node> routers[2] = {Names::Find<Node>("rtr-1"), Names::Find<Node>("rtr-2")};
-  Ptr<Node> producers[2] = {Names::Find<Node>("root-1"), Names::Find<Node>("root-2")};
+  // Ptr<Node> producers[2] = {Names::Find<Node>("root-1"), Names::Find<Node>("root-2")};
+  Ptr<Node> producer = Names::Find<Node>("root-1");
 
   // Choosing forwarding strategy
   ndn::StrategyChoiceHelper::InstallAll("/root", "/localhost/nfd/strategy/best-route");
@@ -92,7 +95,9 @@ main(int argc, char* argv[])
   ndnHelperWithCache.SetDefaultRoutes(true);
   ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
   ndnHelperWithCache.InstallCallback(routers[0], (size_t)&ForwardingDelay, 0);
+  ndnHelperWithCache.InstallBeadDropCallback(routers[0], (size_t)&BeadDropCallback, 0);
   ndnHelperWithCache.InstallCallback(routers[1], (size_t)&ForwardingDelay, 1);
+  ndnHelperWithCache.InstallBeadDropCallback(routers[1], (size_t)&BeadDropCallback, 1);
 
   ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
   // Consumer will request /prefix/0, /prefix/1, ...
@@ -109,9 +114,11 @@ main(int argc, char* argv[])
 
   // Register /root prefix with global routing controller and
   // install producer that will satisfy Interests in /root namespace
-  ndnGlobalRoutingHelper.AddOrigins("/root", producers[0]);
+  ndnGlobalRoutingHelper.AddOrigins("/root", producer);
   producerHelper.SetPrefix("/root");
-  producerHelper.Install(producers[0]).Start(Seconds(9));
+  producerHelper.Install(producer).Start(Seconds(0));
+  producerHelper.Install(producer).Start(Seconds(0));
+  ndnHelperWithCache.InstallCallback(producer, (size_t)&ForwardingDelay, 2);
 
   // ndnGlobalRoutingHelper.AddOrigins("/root/nonbead", producers[1]);
   // producerHelper.SetPrefix("/root/nonbead");

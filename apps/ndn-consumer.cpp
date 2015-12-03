@@ -210,7 +210,7 @@ Consumer::SendPacket()
 void
 Consumer::OnBead(shared_ptr<const Bead> bead)
 {
-    std::cout << "RECEIVED BEAD AT CONSUMER" << std::endl;
+    std::cout << "RECEIVED BEAD AT CONSUMER " << std::endl;
 }
 
 void
