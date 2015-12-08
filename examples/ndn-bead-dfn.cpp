@@ -24,9 +24,9 @@ namespace ns3 {
   ofstream delayFile;
 
   void
-  ForwardingDelay(ns3::Time eventTime, float delay)
+  ForwardingDelay(size_t id, ns3::Time eventTime, float delay, double size)
   {
-    delayFile << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\n";
+    delayFile << id << "\t" << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\n";
   }
 
   ofstream dropFile;

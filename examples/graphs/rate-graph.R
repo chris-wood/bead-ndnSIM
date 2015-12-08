@@ -11,38 +11,26 @@ library(doBy)
 #########################
 # Rate trace processing #
 #########################
-data = read.table("rate-trace_0.5_1", header=T)
+data = read.table("dfn-rate-trace_0.5_1", header=T)
+data = subset(data, Type %in% c("InBeads", "OutBeads"))
+data = subset(data, Node %in% c(160:189))
+
+Nth.delete<-function(dataframe, n)dataframe[-(seq(n,to=nrow(dataframe),by=n)),]
+data = Nth.delete(data, 1000)
+
 data$Node = factor(data$Node)
-data$FaceId <- factor(data$FaceId)
 data$Kilobits <- data$Kilobytes * 8
 data$Type = factor(data$Type)
 
-# exlude irrelevant types
-data = subset(data, Type %in% c("InInterests", "OutInterests", "InData", "OutData", "InBeads", "OutBeads"))
-# data = subset(data, Type %in% c("OutBeads"))
-
-# combine stats from all faces
-data.combined = summaryBy(. ~ Time + Node + Type, data=data, FUN=sum)
-
-data.root = subset (data.combined, Node %in% c("root-1", "root-2"))
-data.leaves = subset(data.combined, Node %in% c("leaf-1", "leaf-2", "leaf-3", "leaf-4"))
-
-# graph rates on all nodes in Kilobits
-g.all <- ggplot(data.combined) +
-  geom_point(aes (x=Time, y=Kilobits.sum, color=Type), size=1) +
+g.all <- ggplot(data, aes(x=Time, y=Kilobits, color=Type)) +
+  geom_point(size=2) +
+  geom_line() +
   ylab("Rate [Kbits/s]") +
-  facet_wrap(~ Node)
+  facet_wrap(~ Node) +
+  theme_bw()
 
 print(g.all)
 
-# graph rates on the root nodes in Packets
-g.root <- ggplot(data.root) +
-  geom_point(aes (x=Time, y=Kilobits.sum, color=Type), size=2) +
-  geom_line(aes (x=Time, y=Kilobits.sum, color=Type), size=0.5) +
-  ylab("Rate [Kbits/s]")
-
-print(g.root)
-
 png("test.png", width=500, height=250)
-print(g.root)
+print(g.all)
 retval <- dev.off()

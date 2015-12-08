@@ -141,6 +141,9 @@ public:
   void
   InstallBeadDropCallback(Ptr<Node> node, size_t callback, int id) const;
 
+  void
+  SetUseHistory(Ptr<Node> node, size_t size) const;
+
   /**
    * \brief Install Ndn stack on the node
    *

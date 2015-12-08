@@ -28,10 +28,10 @@ namespace ns3 {
     ofstream delayFile;
 
     void
-    ForwardingDelay(ns3::Time eventTime, float delay, double size)
+    ForwardingDelay(size_t id, ns3::Time eventTime, float delay, double size)
     {
         // std::cout << "FWD DELAY: " << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\t" << size << "\n";
-        delayFile << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\t" << size << "\n";
+        delayFile << id << "\t" << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\t" << size << "\n";
     }
 
     ofstream dropFile;
@@ -39,7 +39,7 @@ namespace ns3 {
     void
     BeadDropCallback(int id, uint64_t hops)
     {
-    //   std::cout << "BEAD DROP: " << id << "\t" << hops << "\n";
+      std::cout << "BEAD DROP: " << id << "\t" << hops << "\n";
       dropFile << id << "\t" << hops << "\n";
     }
 
@@ -96,8 +96,11 @@ main(int argc, char* argv[])
   ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
   ndnHelperWithCache.InstallCallback(routers[0], (size_t)&ForwardingDelay, 0);
   ndnHelperWithCache.InstallBeadDropCallback(routers[0], (size_t)&BeadDropCallback, 0);
+  ndnHelperWithCache.SetUseHistory(routers[0], 100);
   ndnHelperWithCache.InstallCallback(routers[1], (size_t)&ForwardingDelay, 1);
   ndnHelperWithCache.InstallBeadDropCallback(routers[1], (size_t)&BeadDropCallback, 1);
+  ndnHelperWithCache.SetUseHistory(routers[0], 100);
+
 
   ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
   // Consumer will request /prefix/0, /prefix/1, ...
@@ -137,6 +140,9 @@ main(int argc, char* argv[])
 
   delayFile.flush();
   delayFile.close();
+
+  dropFile.flush();
+  dropFile.close();
 
   return 0;
 }

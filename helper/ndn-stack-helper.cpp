@@ -138,6 +138,14 @@ StackHelper::InstallBeadDropCallback(Ptr<Node> node, size_t callback, int id) co
     forwarder.setBeadDropCallback(callback, id);
 }
 
+void
+StackHelper::SetUseHistory(Ptr<Node> node, size_t size) const
+{
+    Ptr<L3Protocol> l3Protocol = node->GetObject<L3Protocol>();
+    nfd::Forwarder& forwarder = *l3Protocol->getForwarder();
+    forwarder.setUseHistory(size);
+}
+
 Ptr<FaceContainer>
 StackHelper::Install(const NodeContainer& c) const
 {

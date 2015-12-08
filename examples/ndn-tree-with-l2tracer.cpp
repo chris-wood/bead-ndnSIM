@@ -24,21 +24,57 @@
 #include "ns3/ndnSIM-module.h"
 
 namespace ns3 {
+    ofstream delayFile;
+
+    void
+    ForwardingDelay(size_t id, ns3::Time eventTime, float delay, double size)
+    {
+        // std::cout << "FWD DELAY: " << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\t" << size << "\n";
+        delayFile << id << "\t" << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\t" << size << "\n";
+    }
+
+    ofstream dropFile;
+
+    void
+    BeadDropCallback(int id, uint64_t hops)
+    {
+      std::cout << "BEAD DROP: " << id << "\t" << hops << "\n";
+      dropFile << id << "\t" << hops << "\n";
+    }
 
 int
 main(int argc, char* argv[])
 {
-  CommandLine cmd;
-  cmd.Parse(argc, argv);
+    std::string fof = "fof.txt";
+    std::string dropFileName = "drops.txt";
+    std::string topologyFile = "src/ndnSIM/examples/topologies/topo-tree.txt";
+    std::string appDelayFile = "app-delays-trace.txt";
+    std::string rateTraceFile = "rate-trace.txt";
+    std::string percentage = "0.1";
+    std::string frequency = "1";
+    int simulationTime = 1000;
+    int historySize = 100;
 
-  AnnotatedTopologyReader topologyReader("", 10);
+    CommandLine cmd;
+    cmd.AddValue("fof", "forwarder overhead file", fof);
+    cmd.AddValue("time", "simulation time argument", simulationTime);
+    cmd.AddValue("top", "topology file", topologyFile);
+    cmd.AddValue("drop", "bead drop file", dropFileName);
+    cmd.AddValue("appd", "app delay file", appDelayFile);
+    cmd.AddValue("rate", "rate trace file", rateTraceFile);
+    cmd.AddValue("percentage", "bead percentage", percentage);
+    cmd.AddValue("freq", "bead frequency", frequency);
+    cmd.AddValue("hsize", "history size", historySize);
+    cmd.Parse(argc, argv);
+
+  AnnotatedTopologyReader topologyReader("", 24);
   topologyReader.SetFileName("src/ndnSIM/examples/topologies/topo-tree-25-node.txt");
   topologyReader.Read();
 
   /****************************************************************************/
   // Install NDN stack on all nodes
   ndn::StackHelper ndnHelper;
-  ndnHelper.SetOldContentStore("ns3::ndn::cs::Lru", "MaxSize", "1000");
+  ndnHelper.SetOldContentStore("ns3::ndn::cs::Lru", "MaxSize", "0");
   ndnHelper.InstallAll();
   /****************************************************************************/
   // Installing global routing interface on all nodes
@@ -54,54 +90,73 @@ main(int argc, char* argv[])
   Ptr<Node> consumer6 = Names::Find<Node>("Src6");
   Ptr<Node> consumer7 = Names::Find<Node>("Src7");
   Ptr<Node> consumer8 = Names::Find<Node>("Src8");
-  Ptr<Node> consumer9 = Names::Find<Node>("Src9");
+
+  Ptr<Node> routers[15] = {
+    Names::Find<Node>("Rtr1"),
+    Names::Find<Node>("Rtr2"),
+    Names::Find<Node>("Rtr3"),
+    Names::Find<Node>("Rtr4"),
+    Names::Find<Node>("Rtr5"),
+    Names::Find<Node>("Rtr6"),
+    Names::Find<Node>("Rtr7"),
+    Names::Find<Node>("Rtr8"),
+    Names::Find<Node>("Rtr9"),
+    Names::Find<Node>("Rtr10"),
+    Names::Find<Node>("Rtr11"),
+    Names::Find<Node>("Rtr12"),
+    Names::Find<Node>("Rtr13"),
+    Names::Find<Node>("Rtr14"),
+    Names::Find<Node>("Rtr15")};
+
+  ndn::StackHelper ndnHelperWithCache;
+  ndnHelperWithCache.SetDefaultRoutes(true);
+  ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
+  for (int i = 0; i < 15; i++) {
+      ndnHelperWithCache.InstallCallback(routers[i], (size_t)&ForwardingDelay, i);
+      ndnHelperWithCache.InstallBeadDropCallback(routers[i], (size_t)&BeadDropCallback, i);
+      ndnHelperWithCache.SetUseHistory(routers[i], historySize);
+  }
 
   Ptr<Node> producer1 = Names::Find<Node>("Dst1");
-  Ptr<Node> producer2 = Names::Find<Node>("Dst2");
-  Ptr<Node> producer3 = Names::Find<Node>("Dst3");
-  Ptr<Node> producer4 = Names::Find<Node>("Dst4");
-  Ptr<Node> producer5 = Names::Find<Node>("Dst5");
-  Ptr<Node> producer6 = Names::Find<Node>("Dst6");
-  Ptr<Node> producer7 = Names::Find<Node>("Dst7");
-  Ptr<Node> producer8 = Names::Find<Node>("Dst8");
-  Ptr<Node> producer9 = Names::Find<Node>("Dst9");
+  ndnHelperWithCache.InstallCallback(producer1, (size_t)&ForwardingDelay, 16);
+  ndnHelperWithCache.InstallBeadDropCallback(producer1, (size_t)&BeadDropCallback, 16);
+  ndnHelperWithCache.SetUseHistory(producer1, historySize);
   /****************************************************************************/
   ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
-  consumerHelper.SetAttribute("Frequency", StringValue("1000")); // interests per Second
+  consumerHelper.SetAttribute("Frequency", StringValue("10")); // interests per Second
   consumerHelper.SetAttribute("Randomize", StringValue("uniform"));
   /****************************************************************************/
   // on the first to ninth consumer node install a Consumer application
   // that will express interests in /dst1 to /dst9 namespace
-  consumerHelper.SetPrefix("/dst9");
+  consumerHelper.SetPrefix("/dst1");
   consumerHelper.Install(consumer1);
 
-  consumerHelper.SetPrefix("/dst8");
+  consumerHelper.SetPrefix("/dst1");
   consumerHelper.Install(consumer2);
 
-  consumerHelper.SetPrefix("/dst7");
+  consumerHelper.SetPrefix("/dst1");
   consumerHelper.Install(consumer3);
 
-  consumerHelper.SetPrefix("/dst6");
+  consumerHelper.SetPrefix("/dst1");
   consumerHelper.Install(consumer4);
 
-  consumerHelper.SetPrefix("/dst5");
+  consumerHelper.SetPrefix("/dst1");
   consumerHelper.Install(consumer5);
 
-  consumerHelper.SetPrefix("/dst4");
+  consumerHelper.SetPrefix("/dst1");
   consumerHelper.Install(consumer6);
 
-  consumerHelper.SetPrefix("/dst3");
+  consumerHelper.SetPrefix("/dst1");
   consumerHelper.Install(consumer7);
 
-  consumerHelper.SetPrefix("/dst2");
-  consumerHelper.Install(consumer8);
-
   consumerHelper.SetPrefix("/dst1");
-  consumerHelper.Install(consumer9);
+  consumerHelper.Install(consumer8);
 
   /****************************************************************************/
   ndn::AppHelper producerHelper("ns3::ndn::Producer");
   producerHelper.SetAttribute("PayloadSize", StringValue("1024"));
+  producerHelper.SetAttribute("Frequency", StringValue(frequency)); // 1 BEAD every second
+  producerHelper.SetAttribute("Percentage", StringValue(percentage));
   /****************************************************************************/
   // Register /dst1 to /dst9 prefix with global routing controller and
   // install producer that will satisfy Interests in /dst1 to /dst9 namespace
@@ -109,43 +164,11 @@ main(int argc, char* argv[])
   producerHelper.SetPrefix("/dst1");
   producerHelper.Install(producer1);
 
-  ndnGlobalRoutingHelper.AddOrigins("/dst2", producer2);
-  producerHelper.SetPrefix("/dst2");
-  producerHelper.Install(producer2);
-
-  ndnGlobalRoutingHelper.AddOrigins("/dst3", producer3);
-  producerHelper.SetPrefix("/dst3");
-  producerHelper.Install(producer3);
-
-  ndnGlobalRoutingHelper.AddOrigins("/dst4", producer4);
-  producerHelper.SetPrefix("/dst4");
-  producerHelper.Install(producer4);
-
-  ndnGlobalRoutingHelper.AddOrigins("/dst5", producer5);
-  producerHelper.SetPrefix("/dst5");
-  producerHelper.Install(producer5);
-
-  ndnGlobalRoutingHelper.AddOrigins("/dst6", producer6);
-  producerHelper.SetPrefix("/dst6");
-  producerHelper.Install(producer6);
-
-  ndnGlobalRoutingHelper.AddOrigins("/dst7", producer7);
-  producerHelper.SetPrefix("/dst7");
-  producerHelper.Install(producer7);
-
-  ndnGlobalRoutingHelper.AddOrigins("/dst8", producer8);
-  producerHelper.SetPrefix("/dst8");
-  producerHelper.Install(producer8);
-
-  ndnGlobalRoutingHelper.AddOrigins("/dst9", producer9);
-  producerHelper.SetPrefix("/dst9");
-  producerHelper.Install(producer9);
-
   /*****************************************************************************/
   // Calculate and install FIBs
   ndn::GlobalRoutingHelper::CalculateRoutes();
 
-  Simulator::Stop(Seconds(10.0));
+  Simulator::Stop(Seconds(simulationTime));
 
   /****************************************************************************/
   // Tracer:
@@ -154,6 +177,12 @@ main(int argc, char* argv[])
 
   Simulator::Run();
   Simulator::Destroy();
+
+  delayFile.flush();
+  delayFile.close();
+
+  dropFile.flush();
+  dropFile.close();
 
   return 0;
 }
