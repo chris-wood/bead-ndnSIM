@@ -1,39 +1,3 @@
-# import matplotlib.lines as mlines
-# import matplotlib as mpl
-# import matplotlib.pyplot as plt
-# import math
-#
-# shapes = ['*', 'd', 's', 'v', 'o']
-# colors = ['r', 'g', 'b']
-# m = [8.0 * 2 * 1024, 8.0 * 3 * 1024, 8.0 * 4 * 1024]
-# n = range(1, 1001)
-# ns = [ x * 50 for x in range(1, 20) ]
-#
-# lbls = []
-#
-# for c in range(len(colors)):
-#     for k in range(1, 4):
-#         plt.plot([], [], colors[c] + shapes[k - 1] + '-', ms=6, mec=colors[c])
-#         lbls.append('m = ' + str(int(m[c] / (8 * 1024))) + 'KB, k = ' + str(k))
-#
-# plt.legend(lbls, loc=4)
-#
-# for c in range(len(colors)):
-#     for k in range(1, 4):
-#         t = [ -k * x / m[c] for x in n ]
-#         ts = [ -k * x / m[c] for x in ns ]
-#         f = [ (1 - math.exp(x)) ** k for x in t ]
-#         fs = [ (1 - math.exp(x)) ** k for x in ts ]
-#         plt.plot(n, f, colors[c], label='testing')
-#         plt.plot(ns, fs, colors[c] + shapes[k - 1], mec=colors[c], ms=6)
-#
-# plt.yscale('log')
-# plt.xlabel('Number of elements (n)')
-# plt.ylabel('Pr[false positive]')
-# plt.grid()
-# plt.show()
-
-
 #!/usr/bin/env python
 # a bar plot with errorbars
 import numpy as np

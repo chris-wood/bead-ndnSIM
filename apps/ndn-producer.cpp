@@ -191,7 +191,7 @@ Producer::SendBead()
     int numberOfBeads = (int) (m_percentage * dataNames.size());
     int totalCount = dataNames.size();
 
-    std::cout << "Producer is sending " << numberOfBeads << " beads out of " << dataNames.size() << " things" << std::endl;
+    // std::cout << "Producer is sending " << numberOfBeads << " beads out of " << dataNames.size() << " things" << std::endl;
 
     for (int i = 0; i < numberOfBeads; i++) {
         std::string name = dataNames.at(totalCount - i - 1);

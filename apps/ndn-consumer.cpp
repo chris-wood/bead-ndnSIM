@@ -210,7 +210,10 @@ Consumer::SendPacket()
 void
 Consumer::OnBead(shared_ptr<const Bead> bead)
 {
-    std::cout << "RECEIVED BEAD AT CONSUMER " << std::endl;
+    beadCount++;
+    if ((beadCount % 10) == 0) {
+        std::cout << "Consumer received " << beadCount << " beads " << std::endl;
+    }
 }
 
 void

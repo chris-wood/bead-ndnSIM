@@ -29,17 +29,15 @@ namespace ns3 {
     void
     ForwardingDelay(size_t id, ns3::Time eventTime, float delay, double size)
     {
-        // std::cout << "FWD DELAY: " << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\t" << size << "\n";
         delayFile << id << "\t" << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\t" << size << "\n";
     }
 
     ofstream dropFile;
 
     void
-    BeadDropCallback(int id, uint64_t hops)
+    BeadDropCallback(int id, ns3::Time eventTime, uint64_t hops)
     {
-      std::cout << "BEAD DROP: " << id << "\t" << hops << "\n";
-      dropFile << id << "\t" << hops << "\n";
+      dropFile << id << "\t" << eventTime.GetNanoSeconds() << "\t" << hops << "\n";
     }
 
 int
@@ -66,6 +64,9 @@ main(int argc, char* argv[])
     cmd.AddValue("freq", "bead frequency", frequency);
     cmd.AddValue("hsize", "history size", historySize);
     cmd.Parse(argc, argv);
+
+    delayFile.open(fof);
+    dropFile.open(dropFileName);
 
   AnnotatedTopologyReader topologyReader("", 24);
   topologyReader.SetFileName("src/ndnSIM/examples/topologies/topo-tree-25-node.txt");
